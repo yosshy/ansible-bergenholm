@@ -1,0 +1,6 @@
+ansible_ssh_host: "{{ vm_ipaddr }}"
+ansible_ssh_user: "root"
+ansible_ssh_pass: "password"
+vm_name: "{{ inventory_hostname }}"
+vm_datastore: "datastore1"
+vm_ipaddr: "192.168.11.21"

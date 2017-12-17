@@ -1,0 +1,73 @@
+- name: Install CentOS 7 into the new VM on a VMware ESXi host
+  hosts: targets
+  gather_facts: false
+  vars:
+    esxi_host: "192.168.0.1"
+    esxi_user: "root"
+    esxi_pass: "password"
+  tasks:
+    - name: Create a new VM on a VMware ESXi host
+      local_action:
+        module: vsphere_guest
+        vcenter_hostname: "{{ esxi_host }}"
+        username: "{{ esxi_user }}"
+        password: "{{ esxi_pass }}"
+        guest: "{{ vm_name }}"
+        state: powered_on
+        validate_certs: false
+        vm_extra_config:
+          vcpu.hotadd: yes
+          mem.hotadd:  yes
+        vm_disk:
+          disk1:
+            size_gb: 20
+            type: thin
+            datastore: "{{ vm_datastore }}"
+            folder: disk1.vmdk
+        vm_nic:
+          nic1:
+            type: vmxnet3
+            network: bergenholm
+            network_type: standard
+        vm_hardware:
+          memory_mb: 2048
+          num_cpus: 2
+          osid: centos64Guest
+          scsi: paravirtual
+        esxi:
+          datacenter: ha-datacenter
+          hostname: eval3
+      register: newvm
+    - name: Create a new host in Bergenholm 
+      local_action:
+        module: bergenholm_host
+        uuid: "{{ newvm.ansible_facts.hw_product_uuid }}"
+        params:
+          groups:
+            - centos7
+            - centos.amd64
+          hostname: "{{ vm_name }}"
+          ipaddr: "{{ vm_ipaddr }}"
+          netif: ens192
+        state: present
+      notify:
+        - Restart it and begin the installation
+  handlers:
+    - name: Restart it and begin the installation
+      local_action:
+        module: vsphere_guest
+        vcenter_hostname: "{{ esxi_host }}"
+        username: "{{ esxi_user }}"
+        password: "{{ esxi_pass }}"
+        guest: "{{ vm_name }}"
+        state: restarted
+        validate_certs: false
+
+- name: Wait for OS installation
+  hosts: targets
+  gather_facts: false
+  tasks:
+    - name: Wait for SSH service
+      wait_for_connection:
+        sleep: 30
+        timeout: 3600
