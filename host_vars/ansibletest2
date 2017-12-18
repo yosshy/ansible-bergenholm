@@ -1,3 +1,1 @@
-ansible_ssh_host: "{{ vm_ipaddr }}"
-vm_name: "{{ inventory_hostname }}"
 vm_ipaddr: "192.168.11.21"
