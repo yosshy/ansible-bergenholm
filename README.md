@@ -1,4 +1,4 @@
-# ansible-bergenholm: Ansible playbook and modules for Bergenholm
+# ansible-bergenholm: Ansible modules for Bergenholm
 
 ## はじめに
 
@@ -23,8 +23,7 @@
 * Jinja2 テンプレート: Bergenholm は Jinja2 形式のテンプレートファイル
   とパラメータを扱う事ができます。Kickstart や Preseed ファイル用途で、
   テンプレートファイルはホストやグループのパラメータを使用する事ができ
-  ます。[予約パラメータ]
-  (https://github.com/yosshy/bergenholm/blob/master/docs/RESERVED_PARAMS.ja.md)
+  ます。[予約パラメータ](https://github.com/yosshy/bergenholm/blob/master/docs/RESERVED_PARAMS.ja.md)
   を除き、パラメータ定義に制約はありません。
 * リモートファイルのストリーミング: Bergenholm はリモートサイト上のカー
   ネルや initrd イメージを取得し、インストール先サーバに対してそのファ
@@ -58,11 +57,21 @@ Bergenholm のホストとグループを操作する為のモジュールを書
 ```
 
 元々 Bergenholm は JSON 化したパラメータ群を Body として REST API に
-POST/PUT する事でホストを登録・更新しますが、Ansible は YAML でパラメー
-タを記載できます(params)。uuid にはホストのシステムUUID を、state には
-そのエントリが存在するか(present), しないか(absent), インストール済みフ
-ラグが立っているか(installed)／フラグが立っていないか(uninstalled)の 4
-つのいずれかを指定します。
+POST/PUT する事でホストを登録・更新しますが、この Ansible モジュールで
+は params: にホストのパラメータ群を YAML の complex 形式で記述します。
+
+uuid: にはホストのシステム UUID を指定します。Linux OS インストール後で
+あれば ```sudo dmidecode -s system-uuid``` コマンドでシステム UUID を調
+べる事ができます。また、VMware ESXi であれば pysphere モジュール等で、
+Libvirt 環境であれば ```virsh dumpxml <ドメインID>``` で調べる事ができ
+ますし、物理マシンであれば BIOS 設定画面で調べられる場合があります。
+
+state: には以下のいずれかを指定します。
+
+* present: エントリが存在する
+* absent: エントリが存在しない
+* installed: OS のインストールが完了している
+* uninstalled: OS のインストールが完了していない
 
 グループの操作も似たり寄ったりです。
 
@@ -77,7 +86,7 @@ POST/PUT する事でホストを登録・更新しますが、Ansible は YAML 
 ```
 
 ホスト操作だけですが、VMware ESXi 上で VM を作成してインストールを行う
-Playbook (playbook.yml) を作成したので、参考にして下さい。
+Playbook (create.yml) を作成したので、参考にして下さい。
 
 事前に playbook.yml 中の ESXi 用アカウント／パスワードと、host_vars/
 配下の ansibletest* ファイル中のインストール済み環境の SSH アカウント／
@@ -85,5 +94,10 @@ Playbook (playbook.yml) を作成したので、参考にして下さい。
 設定後、以下のコマンドを実行して下さい。
 
 ```
-ansible-playbook -i hosts.ini playbook.yml
+ansible-playbook -i hosts.ini create.yml
+```
+
+delete.yml で作成した VM を削除します。
+```
+ansible-playbook -i hosts.ini delete.yml
 ```
