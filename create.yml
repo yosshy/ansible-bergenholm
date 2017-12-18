@@ -33,6 +33,18 @@
         esxi:
           datacenter: ha-datacenter
           hostname: eval3
+    - name: Check VMs from a VMware ESXi host
+      local_action:
+        module: vsphere_guest
+        vcenter_hostname: "{{ esxi_host }}"
+        username: "{{ esxi_user }}"
+        password: "{{ esxi_pass }}"
+        guest: "{{ vm_name }}"
+        vmware_guest_facts: true
+        validate_certs: false
+        esxi:
+          datacenter: ha-datacenter
+          hostname: eval3
       register: newvm
     - name: Create new hosts in Bergenholm 
       local_action:
