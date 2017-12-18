@@ -1,12 +1,8 @@
-- name: Install CentOS 7 into the new VM on a VMware ESXi host
+- name: Install CentOS 7 into the new VMs on a VMware ESXi host
   hosts: targets
   gather_facts: false
-  vars:
-    esxi_host: "192.168.0.1"
-    esxi_user: "root"
-    esxi_pass: "password"
   tasks:
-    - name: Create a new VM on a VMware ESXi host
+    - name: Create new VMs on a VMware ESXi host
       local_action:
         module: vsphere_guest
         vcenter_hostname: "{{ esxi_host }}"
@@ -38,7 +34,7 @@
           datacenter: ha-datacenter
           hostname: eval3
       register: newvm
-    - name: Create a new host in Bergenholm 
+    - name: Create new hosts in Bergenholm 
       local_action:
         module: bergenholm_host
         uuid: "{{ newvm.ansible_facts.hw_product_uuid }}"
@@ -51,9 +47,9 @@
           netif: ens192
         state: present
       notify:
-        - Restart it and begin the installation
+        - Restart them and begin their installation
   handlers:
-    - name: Restart it and begin the installation
+    - name: Restart them and begin their installation
       local_action:
         module: vsphere_guest
         vcenter_hostname: "{{ esxi_host }}"

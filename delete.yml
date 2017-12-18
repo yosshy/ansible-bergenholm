@@ -1,0 +1,35 @@
+- name: Remove VMs
+  hosts: targets
+  gather_facts: false
+  tasks:
+    - name: Check VMs from a VMware ESXi host
+      local_action:
+        module: vsphere_guest
+        vcenter_hostname: "{{ esxi_host }}"
+        username: "{{ esxi_user }}"
+        password: "{{ esxi_pass }}"
+        guest: "{{ vm_name }}"
+        vmware_guest_facts: true
+        validate_certs: false
+        esxi:
+          datacenter: ha-datacenter
+          hostname: eval3
+      register: newvm
+    - name: Remove VMs from a VMware ESXi host
+      local_action:
+        module: vsphere_guest
+        vcenter_hostname: "{{ esxi_host }}"
+        username: "{{ esxi_user }}"
+        password: "{{ esxi_pass }}"
+        guest: "{{ vm_name }}"
+        state: absent
+        force: true
+        validate_certs: false
+        esxi:
+          datacenter: ha-datacenter
+          hostname: eval3
+    - name: Remove hosts from Bergenholm 
+      local_action:
+        module: bergenholm_host
+        uuid: "{{ newvm.ansible_facts.hw_product_uuid }}"
+        state: absent

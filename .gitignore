@@ -1,2 +1,4 @@
 .venv
 *.retry
+hosts_develop.ini
+group_vars/develop
