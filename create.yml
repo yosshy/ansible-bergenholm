@@ -77,7 +77,7 @@
   tasks:
     - name: Wait for SSH service
       wait_for_connection:
-        sleep: 30
+        sleep: 10
         timeout: 3600
     - name: Aquire facts
       setup:
