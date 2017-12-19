@@ -16,10 +16,6 @@
           hostname: eval3
       register: newvm
       ignore_errors: true
-      notify:
-        - ESXi 上の VM を削除する
-        - Bergenholm 上の VM の設定を削除する
-  handlers:
     - name: ESXi 上の VM を削除する
       local_action:
         module: vsphere_guest
@@ -38,3 +34,4 @@
         module: bergenholm_host
         uuid: "{{ newvm.ansible_facts.hw_product_uuid }}"
         state: absent
+      when: newvm | success
