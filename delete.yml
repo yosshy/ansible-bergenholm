@@ -1,8 +1,8 @@
-- name: Remove VMs
+- name: VM を削除する
   hosts: targets
   gather_facts: false
   tasks:
-    - name: Check VMs from a VMware ESXi host
+    - name: ESXi 上の VM 情報を取得する
       local_action:
         module: vsphere_guest
         vcenter_hostname: "{{ esxi_host }}"
@@ -15,7 +15,12 @@
           datacenter: ha-datacenter
           hostname: eval3
       register: newvm
-    - name: Remove VMs from a VMware ESXi host
+      ignore_errors: true
+      notify:
+        - ESXi 上の VM を削除する
+        - Bergenholm 上の VM の設定を削除する
+  handlers:
+    - name: ESXi 上の VM を削除する
       local_action:
         module: vsphere_guest
         vcenter_hostname: "{{ esxi_host }}"
@@ -28,7 +33,7 @@
         esxi:
           datacenter: ha-datacenter
           hostname: eval3
-    - name: Remove hosts from Bergenholm 
+    - name: Bergenholm 上の VM の設定を削除する
       local_action:
         module: bergenholm_host
         uuid: "{{ newvm.ansible_facts.hw_product_uuid }}"

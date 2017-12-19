@@ -1,8 +1,8 @@
-- name: Install CentOS 7 into the new VMs on a VMware ESXi host
+- name: CentOS 7 VM を用意する
   hosts: targets
   gather_facts: false
   tasks:
-    - name: Create new VMs on a VMware ESXi host
+    - name: ESXi 上に VM を作成する
       local_action:
         module: vsphere_guest
         vcenter_hostname: "{{ esxi_host }}"
@@ -33,7 +33,7 @@
         esxi:
           datacenter: ha-datacenter
           hostname: eval3
-    - name: Check VMs from a VMware ESXi host
+    - name: ESXi 上の VM の情報を取得する
       local_action:
         module: vsphere_guest
         vcenter_hostname: "{{ esxi_host }}"
@@ -46,7 +46,7 @@
           datacenter: ha-datacenter
           hostname: eval3
       register: newvm
-    - name: Create new hosts in Bergenholm 
+    - name: Bergenholm 上に新しい VM の設定を登録する
       local_action:
         module: bergenholm_host
         uuid: "{{ newvm.ansible_facts.hw_product_uuid }}"
@@ -59,9 +59,9 @@
           netif: ens192
         state: present
       notify:
-        - Restart them and begin their installation
+        - VM を再起動して OS インストールを開始する
   handlers:
-    - name: Restart them and begin their installation
+    - name: VM を再起動して OS インストールを開始する
       local_action:
         module: vsphere_guest
         vcenter_hostname: "{{ esxi_host }}"
@@ -71,16 +71,16 @@
         state: restarted
         validate_certs: false
 
-- name: Wait for OS installation
+- name: OS インストール後の確認を行う
   hosts: targets
   gather_facts: false
   tasks:
-    - name: Wait for SSH service
+    - name: OS インストール完了待ち
       wait_for_connection:
         sleep: 10
         timeout: 3600
-    - name: Aquire facts
+    - name: Facts を取得する
       setup:
-    - name: Display OS information
+    - name: ディストリビューション情報を表示する
       debug:
         msg: "{{ ansible_distribution }} {{ ansible_distribution_version }} ({{ansible_distribution_release}})" 
